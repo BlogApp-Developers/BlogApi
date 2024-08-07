@@ -1,16 +1,23 @@
+using BlogApi.Data;
 using BlogApi.Models;
 using BlogApi.Services;
 using BlogApi.Services.Base;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
 public class TopicController : ControllerBase
 {
     private readonly ITopicService _topicService;
+    private readonly BlogDbContext _context;
 
-    public TopicController(ITopicService topicService)
+    public TopicController(ITopicService topicService, BlogDbContext context)
     {
         this._topicService = topicService;
+        this._context = context;
     }
 
     [HttpGet("[action]")]
@@ -22,7 +29,7 @@ public class TopicController : ControllerBase
 
             if (topics == null || !topics.Any())
             {
-                return NotFound("Blogs not found");
+                return NotFound("Topics not found");
             }
 
             return Ok(topics);
@@ -32,4 +39,33 @@ public class TopicController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> AssignTopicsToUser(Guid userId, List<int> topicIds)
+    {
+        if (topicIds.Count < 3)
+        {
+            return BadRequest("You must select at least 3 topics.");
+        }
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var existingTopics = await _context.Topics.Where(t => topicIds.Contains(t.Id)).ToListAsync();
+
+        var userTopics = existingTopics.Select(t => new UserTopic
+        {
+            UserId = userId,
+            TopicId = t.Id
+        }).ToList();
+
+        _context.UserTopics.AddRange(userTopics);
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
 }
