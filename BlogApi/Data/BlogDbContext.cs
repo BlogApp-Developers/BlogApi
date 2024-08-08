@@ -10,6 +10,8 @@ public class BlogDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     public DbSet<Blog> Blogs { get; set; }
     public DbSet<Topic> Topics { get; set; }
     public DbSet<UserTopic> UserTopics { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<Like> Likes { get; set; }
 
     public BlogDbContext(DbContextOptions<BlogDbContext> options) : base(options)
     {
@@ -41,5 +43,25 @@ public class BlogDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
             .HasOne(b => b.Topic)
             .WithMany(t => t.Blogs)
             .HasForeignKey(b => b.TopicId);
+
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Blog)
+            .WithMany(b => b.Comments)
+            .HasForeignKey(c => c.BlogId);
+
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.Comments)
+            .HasForeignKey(c => c.UserId);
+
+        modelBuilder.Entity<Like>()
+            .HasOne(l => l.Blog)
+            .WithMany(b => b.Likes)
+            .HasForeignKey(l => l.BlogId);
+
+        modelBuilder.Entity<Like>()
+            .HasOne(l => l.User)
+            .WithMany(u => u.Likes)
+            .HasForeignKey(l => l.UserId);
     }
 }

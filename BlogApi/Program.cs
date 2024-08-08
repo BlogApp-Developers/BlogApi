@@ -41,7 +41,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
-app.UseCors("PracticeCors");
+app.UseCors("BlazorApp");
 
 app.Run();
 
