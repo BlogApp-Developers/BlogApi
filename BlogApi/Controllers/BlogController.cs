@@ -24,11 +24,11 @@ public class BlogController : ControllerBase
         {
             await blogService.CreateNewBlogAsync(blog, image);
             return Ok();
-            
+
         }
         catch (Exception ex)
         {
-            
+
             return StatusCode(400, ex.Message);
         }
     }
@@ -55,4 +55,31 @@ public class BlogController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+
+
+    [HttpGet("[action]")]
+    public async Task<ActionResult<IEnumerable<Blog>>> SearchBlogsByTitle(string title)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return BadRequest("Title parameter is required");
+            }
+
+            var blogs = await blogService.SearchBlogsByTitleAsync(title);
+
+            if (blogs == null || !blogs.Any())
+            {
+                return NotFound("No blogs found with the given title");
+            }
+
+            return Ok(blogs);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
 }

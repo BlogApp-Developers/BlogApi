@@ -107,4 +107,74 @@ public class TopicController : ControllerBase
 
         return Ok();
     }
+
+
+
+    [HttpGet("RecommendedTopics/{userId}")]
+    public async Task<ActionResult<IEnumerable<Topic>>> GetRecommendedTopics(Guid userId)
+    {
+        try
+        {
+            var userTopics = await _context.UserTopics
+                .Where(ut => ut.UserId == userId)
+                .Select(ut => ut.TopicId)
+                .ToListAsync();
+
+            var recommendedTopics = await _context.Topics
+                .Where(t => !userTopics.Contains(t.Id))
+                .Take(10)
+                .ToListAsync();
+
+            return Ok(recommendedTopics);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+
+    [HttpPost("AddTopicToUser/{userId}/{topicId}")]
+    public async Task<IActionResult> AddTopicToUser(Guid userId, int topicId)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var topic = await _context.Topics.FindAsync(topicId);
+            if (topic == null)
+            {
+                return NotFound("Topic not found");
+            }
+
+            var userTopicExists = await _context.UserTopics
+                .AnyAsync(ut => ut.UserId == userId && ut.TopicId == topicId);
+
+            if (userTopicExists)
+            {
+                return BadRequest("Topic is already assigned to the user");
+            }
+
+            var userTopic = new UserTopic
+            {
+                UserId = userId,
+                TopicId = topicId
+            };
+
+            _context.UserTopics.Add(userTopic);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+
 }

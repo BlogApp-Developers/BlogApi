@@ -34,4 +34,10 @@ public class BlogEfRepository : IBlogRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Blog>> SearchBlogsByTitle(string title)
+    {
+        return await _dbContext.Blogs
+            .Where(b => EF.Functions.Like(b.Title, $"%{title}%"))
+            .ToListAsync();
+    }
 }

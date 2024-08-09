@@ -23,4 +23,9 @@ public class BlogService : IBlogService
     {
         return await _blogRepository.GetBlogsByTopics(topicId);
     }
+
+    public Task<IEnumerable<Blog>> SearchBlogsByTitleAsync(string title)
+    {
+        return _blogRepository.SearchBlogsByTitle(title);
+    }
 }
