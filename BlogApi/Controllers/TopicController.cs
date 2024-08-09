@@ -40,7 +40,47 @@ public class TopicController : ControllerBase
         }
     }
 
-    [HttpPost("[action]")]
+
+    [HttpGet("GetUserTopics/{userId}")]
+    public async Task<ActionResult<IEnumerable<Topic>>> GetUserTopics(Guid userId)
+    {
+        try
+        {
+            
+            var userTopics = await _context.UserTopics
+                .Where(ut => ut.UserId == userId)
+                .ToListAsync();
+
+            if (userTopics == null || !userTopics.Any())
+            {
+                return NotFound("No topics found for this user.");
+            }
+
+        
+            var topicIds = userTopics.Select(ut => ut.TopicId).ToList();
+
+            
+            var topics = await _context.Topics
+                .Where(t => topicIds.Contains(t.Id))
+                .ToListAsync();
+
+            if (topics == null || !topics.Any())
+            {
+                return NotFound("Topics not found.");
+            }
+
+            return Ok(topics);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+
+
+
+    [HttpPost("AssignTopicsToUser/{userId}")]
     public async Task<IActionResult> AssignTopicsToUser(Guid userId, List<int> topicIds)
     {
         if (topicIds.Count < 3)
