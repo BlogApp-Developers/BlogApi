@@ -42,11 +42,10 @@ public class TopicController : ControllerBase
 
 
     [HttpGet("GetUserTopics/{userId}")]
-    public async Task<ActionResult<IEnumerable<Topic>>> GetUserTopics(Guid userId)
+    public async Task<ActionResult<IEnumerable<TopicDto>>> GetUserTopics(Guid userId)
     {
         try
         {
-            
             var userTopics = await _context.UserTopics
                 .Where(ut => ut.UserId == userId)
                 .ToListAsync();
@@ -56,10 +55,8 @@ public class TopicController : ControllerBase
                 return NotFound("No topics found for this user.");
             }
 
-        
             var topicIds = userTopics.Select(ut => ut.TopicId).ToList();
 
-            
             var topics = await _context.Topics
                 .Where(t => topicIds.Contains(t.Id))
                 .ToListAsync();
@@ -69,16 +66,19 @@ public class TopicController : ControllerBase
                 return NotFound("Topics not found.");
             }
 
-            return Ok(topics);
+            var topicDtos = topics.Select(t => new TopicDto
+            {
+                Id = t.Id,
+                Name = t.Name
+            }).ToList();
+
+            return Ok(topicDtos);
         }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);
         }
     }
-
-
-
 
     [HttpPost("AssignTopicsToUser/{userId}")]
     public async Task<IActionResult> AssignTopicsToUser(Guid userId, List<int> topicIds)
@@ -107,5 +107,4 @@ public class TopicController : ControllerBase
 
         return Ok();
     }
-
 }
