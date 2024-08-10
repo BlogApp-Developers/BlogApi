@@ -19,8 +19,7 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseNpgsql(connectionString);
 });
 
-var blobConnectionString = builder.Configuration.GetSection("BlobStorage:ConnectionString").Value;
-builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
+
 
 builder.Services.AddTransient<IBlogService, BlogService>();
 builder.Services.AddTransient<IBlogRepository, BlogEfRepository>();

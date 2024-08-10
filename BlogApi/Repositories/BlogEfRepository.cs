@@ -8,33 +8,27 @@ namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
-    private readonly BlobServiceClient _blobServiceClient;
+    
 
-    public BlogEfRepository(BlogDbContext dbContext, BlobServiceClient blobServiceClient)
+    public BlogEfRepository(BlogDbContext dbContext)
     {
         _dbContext = dbContext;
-        _blobServiceClient = blobServiceClient;
+        
     }
 
 
     public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     {
-        var containerClient = _blobServiceClient.GetBlobContainerClient("blogimages");
-
         obj.Id = Guid.NewGuid();
         var extension = new FileInfo(image.FileName).Extension[1..];
-        var blobName = $"{obj.Id}.{extension}";
-        obj.PictureUrl = $"https://{_blobServiceClient.AccountName}.blob.core.windows.net/blogimages/{blobName}";
+        obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
 
-        var blobClient = containerClient.GetBlobClient(blobName);
-
-        using (var imageStream = image.OpenReadStream())
-        {
-            await blobClient.UploadAsync(imageStream, true);
-        }
+        using var newFileStream = System.IO.File.Create(obj.PictureUrl);
+        await image.CopyToAsync(newFileStream);
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
+        
     }
 
 
