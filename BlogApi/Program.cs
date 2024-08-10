@@ -1,0 +1,64 @@
+using System.Text.Json.Serialization;
+using Azure.Storage.Blobs;
+using BlogApi.Data;
+using BlogApi.Extensions;
+using BlogApi.Repositories;
+using BlogApi.Repositories.Base;
+using BlogApi.Services;
+using BlogApi.Services.Base;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<BlogDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("PostgreSqlDev");
+    options.UseNpgsql(connectionString);
+});
+
+var blobConnectionString = builder.Configuration.GetSection("BlobStorage:ConnectionString").Value;
+builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
+
+builder.Services.AddTransient<IBlogService, BlogService>();
+builder.Services.AddTransient<IBlogRepository, BlogEfRepository>();
+
+builder.Services.AddTransient<ITopicService, TopicService>();
+builder.Services.AddTransient<ITopicRepository, TopicEfRepository>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    });
+
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+    });
+
+builder.Services.InitCors();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapControllers();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseHttpsRedirection();
+app.UseCors("BlazorApp");
+
+app.Run();
+
