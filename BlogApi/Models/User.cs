@@ -4,6 +4,7 @@ namespace BlogApi.Models
     using Microsoft.AspNetCore.Identity;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Text.Json.Serialization;
 
     public class User : IdentityUser<Guid>
     {
@@ -12,7 +13,7 @@ namespace BlogApi.Models
         public ICollection<UserTopic> Topics { get; set; } = new List<UserTopic>();
 
         public string? AboutMe { get; set; }
-
+        [JsonIgnore]
         public ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();

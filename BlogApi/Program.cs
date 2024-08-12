@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Storage.Blobs;
 using BlogApi.Data;
@@ -27,18 +28,28 @@ builder.Services.AddTransient<IBlogRepository, BlogEfRepository>();
 builder.Services.AddTransient<ITopicService, TopicService>();
 builder.Services.AddTransient<ITopicRepository, TopicEfRepository>();
 
+// builder.Services.AddControllers()
+//     .AddJsonOptions(options =>
+//     {
+//         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+//     });
+
+// builder.Services.AddControllers()
+//     .AddNewtonsoftJson(options =>
+//     {
+//         options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+//         options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+//     });
+
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddControllers()
-    .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-    });
 
 builder.Services.InitCors();
 builder.Services.AddAuthorization();

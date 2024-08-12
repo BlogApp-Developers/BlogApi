@@ -8,12 +8,12 @@ namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
-    
+
 
     public BlogEfRepository(BlogDbContext dbContext)
     {
         _dbContext = dbContext;
-        
+
     }
 
 
@@ -28,7 +28,7 @@ public class BlogEfRepository : IBlogRepository
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
-        
+
     }
 
 
@@ -37,15 +37,22 @@ public class BlogEfRepository : IBlogRepository
         return await _dbContext.Blogs.FirstOrDefaultAsync((b) => b.Id == id);
     }
 
-    public async Task<IEnumerable<Blog>?> GetBlogsByTopics(int topicId)
+    public async Task<IEnumerable<BlogDto>?> GetBlogsByTopics(int topicId)
     {
         var blogs = await _dbContext.Blogs
-        .Where(blog => blog.TopicId == topicId)
-        .Include(blog => blog.User)
-        .Include(blog => blog.Topic)
-        .ToListAsync();
+            .Where(blog => blog.TopicId == topicId)
+            .Include(blog => blog.User)
+            .Select(blog => new BlogDto
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Text = blog.Text,
+                UserName = blog.User.UserName,
+                CreationDate = blog.CreationDate
+            })
+            .ToListAsync();
 
-        return blogs.AsEnumerable();
+        return blogs;
     }
 
     public async Task<IEnumerable<Blog>> SearchBlogsByTitle(string title)

@@ -24,7 +24,7 @@ public class BlogService : IBlogService
         return await _blogRepository.GetBlogById(id);
     }
 
-    public async Task<IEnumerable<Blog>> GetBlogsByTopicAsync(int topicId)
+    public async Task<IEnumerable<BlogDto>> GetBlogsByTopicAsync(int topicId)
     {
         return await _blogRepository.GetBlogsByTopics(topicId);
     }
