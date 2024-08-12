@@ -48,6 +48,7 @@ public class BlogEfRepository : IBlogRepository
                 Title = blog.Title,
                 Text = blog.Text,
                 UserName = blog.User.UserName,
+                PictureUrl = blog.PictureUrl,
                 CreationDate = blog.CreationDate
             })
             .ToListAsync();
