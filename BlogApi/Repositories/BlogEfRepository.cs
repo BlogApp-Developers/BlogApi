@@ -39,9 +39,13 @@ public class BlogEfRepository : IBlogRepository
 
     public async Task<IEnumerable<Blog>?> GetBlogsByTopics(int topicId)
     {
-        return await _dbContext.Blogs
-            .Where(blog => blog.TopicId == topicId)
-            .ToListAsync();
+        var blogs = await _dbContext.Blogs
+        .Where(blog => blog.TopicId == topicId)
+        .Include(blog => blog.User)
+        .Include(blog => blog.Topic)
+        .ToListAsync();
+
+        return blogs.AsEnumerable();
     }
 
     public async Task<IEnumerable<Blog>> SearchBlogsByTitle(string title)

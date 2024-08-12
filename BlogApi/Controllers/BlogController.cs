@@ -18,17 +18,26 @@ public class BlogController : ControllerBase
 
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> CreateBlog([FromForm] Blog blog, IFormFile image)
+    public async Task<IActionResult> CreateBlog([FromForm] string title, [FromForm] string text, [FromForm] int topicId, [FromForm] Guid userId, IFormFile image)
     {
         try
         {
+       
+            var blog = new Blog
+            {
+                Id = Guid.NewGuid(), 
+                Title = title,
+                Text = text,
+                TopicId = topicId,
+                UserId = userId,
+                CreationDate = DateTime.UtcNow
+            };
+
             await blogService.CreateNewBlogAsync(blog, image);
             return Ok();
-
         }
         catch (Exception ex)
         {
-
             return StatusCode(400, ex.Message);
         }
     }
