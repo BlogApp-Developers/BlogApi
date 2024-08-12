@@ -98,4 +98,17 @@ public class BlogController : ControllerBase
         return await blogService.GetBlogById(id);
     }
 
+
+    [HttpGet("[action]/{id}")]
+    public async Task<IActionResult> Image(Guid id)
+    {
+        var blog = await blogService.GetBlogById(id);
+        if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
+        {
+            return NotFound("Blogs or image not found.");
+        }
+        var fileStream = System.IO.File.Open(blog.PictureUrl!, FileMode.Open);
+        return File(fileStream, "image/jpeg");
+    }
+
 }
