@@ -16,16 +16,18 @@ namespace BlogApi.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> LikeBlog([FromBody] Like like)
+        [HttpPost("LikeBlog")]
+        public async Task<IActionResult> LikeBlog([FromBody] Guid blogId, [FromBody] Guid userId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            // if (like == null)
+            // {
+            //     return BadRequest("Like object is null.");
+            // }
+
+            
 
             var existingLike = await _context.Likes
-                .Where(l => l.BlogId == like.BlogId && l.UserId == like.UserId)
+                .Where(l => l.BlogId == blogId && l.UserId == userId)
                 .FirstOrDefaultAsync();
 
             if (existingLike != null)
@@ -33,13 +35,18 @@ namespace BlogApi.Controllers
                 return BadRequest("User has already liked this blog.");
             }
 
+            var like = new Like();
             like.LikedAt = DateTime.UtcNow;
+            like.BlogId = blogId;
+            like.UserId = userId;
 
             _context.Likes.Add(like);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetLikesForBlog), new { blogId = like.BlogId }, like);
         }
+
+
 
         [HttpGet("blog/{blogId}")]
         public async Task<IActionResult> GetLikesForBlog(Guid blogId)
