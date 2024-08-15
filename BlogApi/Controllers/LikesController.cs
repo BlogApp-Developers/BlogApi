@@ -17,33 +17,43 @@ namespace BlogApi.Controllers
         }
 
         [HttpPost("LikeBlog")]
-        public async Task<IActionResult> LikeBlog([FromBody] Guid blogId, [FromBody] Guid userId)
+        public async Task<IActionResult> LikeBlog([FromBody] LikeRequest request)
         {
-            // if (like == null)
-            // {
-            //     return BadRequest("Like object is null.");
-            // }
+            var user = await _context.Users.FindAsync(request.UserId);
+            var blog = await _context.Blogs.FindAsync(request.BlogId);
 
-            
+            if (user == null || blog == null)
+            {
+                return NotFound();
+            }
 
             var existingLike = await _context.Likes
-                .Where(l => l.BlogId == blogId && l.UserId == userId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(l => l.BlogId == request.BlogId && l.UserId == request.UserId);
 
             if (existingLike != null)
             {
-                return BadRequest("User has already liked this blog.");
+                return BadRequest("User already liked this blog.");
             }
 
-            var like = new Like();
-            like.LikedAt = DateTime.UtcNow;
-            like.BlogId = blogId;
-            like.UserId = userId;
+            var like = new Like
+            {
+                BlogId = request.BlogId,
+                UserId = request.UserId,
+                LikedAt = DateTime.UtcNow
+            };
 
             _context.Likes.Add(like);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetLikesForBlog), new { blogId = like.BlogId }, like);
+            return Ok();
+        }
+
+
+        [HttpGet("IsLiked")]
+        public async Task<IActionResult> IsLiked([FromQuery] Guid blogId, [FromQuery] Guid userId)
+        {
+            var isLiked = await _context.Likes.AnyAsync(l => l.BlogId == blogId && l.UserId == userId);
+            return Ok(isLiked);
         }
 
 
