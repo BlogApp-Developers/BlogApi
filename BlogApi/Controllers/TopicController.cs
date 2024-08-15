@@ -2,12 +2,14 @@ using BlogApi.Data;
 using BlogApi.Models;
 using BlogApi.Services;
 using BlogApi.Services.Base;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class TopicController : ControllerBase
 {

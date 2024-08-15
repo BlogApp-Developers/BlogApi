@@ -51,6 +51,8 @@ builder.Services.AddControllers()
     });
 
 
+builder.Services.InitAspnetIdentity(builder.Configuration);
+builder.Services.InitAuth(builder.Configuration);
 builder.Services.InitCors();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
