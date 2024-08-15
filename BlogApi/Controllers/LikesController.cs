@@ -17,37 +17,30 @@ namespace BlogApi.Controllers
         }
 
         [HttpPost("LikeBlog")]
-        public async Task<IActionResult> LikeBlog([FromBody] LikeRequest request)
+        public async Task<IActionResult> LikeBlog([FromBody] LikeRequest likeRequest)
         {
-            var user = await _context.Users.FindAsync(request.UserId);
-            var blog = await _context.Blogs.FindAsync(request.BlogId);
+            var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.BlogId == likeRequest.BlogId && l.UserId == likeRequest.UserId);
 
-            if (user == null || blog == null)
+            if (existingLike == null)
             {
-                return NotFound();
+                var like = new Like
+                {
+                    BlogId = likeRequest.BlogId,
+                    UserId = likeRequest.UserId,
+                    LikedAt = DateTime.UtcNow
+                };
+                _context.Likes.Add(like);
+            }
+            else
+            {
+                _context.Likes.Remove(existingLike);
             }
 
-            var existingLike = await _context.Likes
-                .FirstOrDefaultAsync(l => l.BlogId == request.BlogId && l.UserId == request.UserId);
-
-            if (existingLike != null)
-            {
-                return BadRequest("User already liked this blog.");
-            }
-
-            var like = new Like
-            {
-                BlogId = request.BlogId,
-                UserId = request.UserId,
-                LikedAt = DateTime.UtcNow
-            };
-
-            _context.Likes.Add(like);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            var likeCount = await _context.Likes.CountAsync(l => l.BlogId == likeRequest.BlogId);
+            return Ok(likeCount);
         }
-
 
         [HttpGet("IsLiked")]
         public async Task<IActionResult> IsLiked([FromQuery] Guid blogId, [FromQuery] Guid userId)
@@ -56,31 +49,13 @@ namespace BlogApi.Controllers
             return Ok(isLiked);
         }
 
-
-
-        [HttpGet("blog/{blogId}")]
+        [HttpGet("GetLikesForBlog/{blogId}")]
         public async Task<IActionResult> GetLikesForBlog(Guid blogId)
         {
-            var likes = await _context.Likes
-                .Where(l => l.BlogId == blogId)
-                .ToListAsync();
-
-            return Ok(likes);
+            var likeCount = await _context.Likes.CountAsync(l => l.BlogId == blogId);
+            return Ok(likeCount);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> UnlikeBlog(int id)
-        {
-            var like = await _context.Likes.FindAsync(id);
-            if (like == null)
-            {
-                return NotFound();
-            }
 
-            _context.Likes.Remove(like);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
     }
 }
