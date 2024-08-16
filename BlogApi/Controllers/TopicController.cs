@@ -5,6 +5,7 @@ using BlogApi.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 
 namespace BlogApi.Controllers;
 
@@ -54,8 +55,11 @@ public class TopicController : ControllerBase
         {
             try
             {
-                var tokenNew = base.HttpContext.Request.Headers["Bearer"][0];
-                tokenValidation.ValidateToken(tokenNew);
+                base.HttpContext.Request.Headers.TryGetValue("Bearer", out StringValues headerValues);
+
+                var tokenNew = headerValues.FirstOrDefault();
+
+                this.tokenValidation.ValidateToken(tokenNew);
             }
             catch (Exception ex)
             {
