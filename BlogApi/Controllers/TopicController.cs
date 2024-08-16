@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BlogApi.Controllers;
 
 [ApiController]
-[Authorize]
+//[Authorize]
 [Route("api/[controller]")]
 public class TopicController : ControllerBase
 {

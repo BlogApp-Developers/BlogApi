@@ -7,6 +7,7 @@ using BlogApi.Repositories;
 using BlogApi.Repositories.Base;
 using BlogApi.Services;
 using BlogApi.Services.Base;
+using BlogApi.TokenValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
@@ -30,6 +31,7 @@ builder.Services.AddTransient<IBlogRepository, BlogEfRepository>();
 
 builder.Services.AddTransient<ITopicService, TopicService>();
 builder.Services.AddTransient<ITopicRepository, TopicEfRepository>();
+builder.Services.AddTransient<TokenValidation>();
 
 // builder.Services.AddControllers()
 //     .AddJsonOptions(options =>
