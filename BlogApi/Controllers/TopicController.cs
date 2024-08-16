@@ -30,7 +30,17 @@ public class TopicController : ControllerBase
     {
         try
         {
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
 
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
 
             var topics = await _topicService.GetAllTopicsAsync();
 
@@ -55,10 +65,9 @@ public class TopicController : ControllerBase
         {
             try
             {
-                base.HttpContext.Request.Headers.TryGetValue("Bearer", out StringValues headerValues);
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
 
-                var tokenNew = headerValues.FirstOrDefault();
-
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
                 this.tokenValidation.ValidateToken(tokenNew);
             }
             catch (Exception ex)
@@ -104,6 +113,17 @@ public class TopicController : ControllerBase
     [HttpPost("AssignTopicsToUser/{userId}")]
     public async Task<IActionResult> AssignTopicsToUser(Guid userId, List<int> topicIds)
     {
+        try
+        {
+            base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+            var tokenNew = headerValues.FirstOrDefault().Substring(7);
+            this.tokenValidation.ValidateToken(tokenNew);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(ex.Message);
+        }
         if (topicIds.Count < 3)
         {
             return BadRequest("You must select at least 3 topics.");
@@ -136,6 +156,17 @@ public class TopicController : ControllerBase
     {
         try
         {
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             var userTopics = await _context.UserTopics
                 .Where(ut => ut.UserId == userId)
                 .Select(ut => ut.TopicId)
@@ -160,6 +191,17 @@ public class TopicController : ControllerBase
     {
         try
         {
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {

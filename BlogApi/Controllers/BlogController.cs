@@ -2,6 +2,7 @@ using BlogApi.Models;
 using BlogApi.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace BlogApi.Controllers;
 
@@ -11,9 +12,11 @@ namespace BlogApi.Controllers;
 public class BlogController : ControllerBase
 {
     private readonly IBlogService blogService;
-    public BlogController(IBlogService blogService)
+    private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
+    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation)
     {
         this.blogService = blogService;
+        this.tokenValidation = tokenValidation;
     }
 
 
@@ -22,10 +25,20 @@ public class BlogController : ControllerBase
     {
         try
         {
-       
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             var blog = new Blog
             {
-                Id = Guid.NewGuid(), 
+                Id = Guid.NewGuid(),
                 Title = title,
                 Text = text,
                 TopicId = topicId,
@@ -49,7 +62,17 @@ public class BlogController : ControllerBase
         try
         {
 
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
 
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             var blogs = await blogService.GetBlogsByTopicAsync(topicId);
 
             if (blogs == null || !blogs.Any())
@@ -71,6 +94,17 @@ public class BlogController : ControllerBase
     {
         try
         {
+            try
+            {
+                base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                this.tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             if (string.IsNullOrWhiteSpace(title))
             {
                 return BadRequest("Title parameter is required");
@@ -95,6 +129,17 @@ public class BlogController : ControllerBase
     [HttpGet("GetBlogById/{id}")]
     public async Task<ActionResult<Blog>> GetBlogById(Guid id)
     {
+        try
+        {
+            base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+            var tokenNew = headerValues.FirstOrDefault().Substring(7);
+            this.tokenValidation.ValidateToken(tokenNew);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(ex.Message);
+        }
         return await blogService.GetBlogById(id);
     }
 
@@ -102,6 +147,17 @@ public class BlogController : ControllerBase
     [HttpGet("[action]/{id}")]
     public async Task<IActionResult> Image(Guid id)
     {
+        try
+        {
+            base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+
+            var tokenNew = headerValues.FirstOrDefault().Substring(7);
+            this.tokenValidation.ValidateToken(tokenNew);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(ex.Message);
+        }
         var blog = await blogService.GetBlogById(id);
         if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
         {
