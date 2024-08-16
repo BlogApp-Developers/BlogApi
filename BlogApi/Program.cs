@@ -13,6 +13,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.InitCors();
+builder.Services.InitAspnetIdentity(builder.Configuration);
+builder.Services.InitAuth(builder.Configuration);
 
 builder.Services.AddDbContext<BlogDbContext>(options =>
 {
@@ -51,11 +54,9 @@ builder.Services.AddControllers()
     });
 
 
-builder.Services.InitAspnetIdentity(builder.Configuration);
-builder.Services.InitAuth(builder.Configuration);
-builder.Services.InitCors();
+
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
+//builder.Services.AddAuthentication();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();

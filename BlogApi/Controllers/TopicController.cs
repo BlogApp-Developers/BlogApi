@@ -15,9 +15,11 @@ public class TopicController : ControllerBase
 {
     private readonly ITopicService _topicService;
     private readonly BlogDbContext _context;
+    private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
 
-    public TopicController(ITopicService topicService, BlogDbContext context)
+    public TopicController(ITopicService topicService, BlogDbContext context, BlogApi.TokenValidation.TokenValidation tokenValidation)
     {
+        this.tokenValidation = tokenValidation;
         this._topicService = topicService;
         this._context = context;
     }
@@ -27,6 +29,8 @@ public class TopicController : ControllerBase
     {
         try
         {
+
+
             var topics = await _topicService.GetAllTopicsAsync();
 
             if (topics == null || !topics.Any())
@@ -48,6 +52,17 @@ public class TopicController : ControllerBase
     {
         try
         {
+            try
+            {
+                var tokenNew = base.HttpContext.Request.Headers["Bearer"][0];
+                tokenValidation.ValidateToken(tokenNew);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+
+
             var userTopics = await _context.UserTopics
                 .Where(ut => ut.UserId == userId)
                 .ToListAsync();
