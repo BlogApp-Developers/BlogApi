@@ -7,7 +7,7 @@ using Microsoft.Extensions.Primitives;
 namespace BlogApi.Controllers;
 
 [ApiController]
-[Authorize]
+
 [Route("api/[controller]")]
 public class BlogController : ControllerBase
 {
@@ -19,7 +19,7 @@ public class BlogController : ControllerBase
         this.tokenValidation = tokenValidation;
     }
 
-
+    [Authorize]
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateBlog([FromForm] string title, [FromForm] string text, [FromForm] int topicId, [FromForm] Guid userId, IFormFile image)
     {
@@ -57,6 +57,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("GetBlogsByTopic/{topicId}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<Blog>>> GetBlogsByTopic(int topicId)
     {
         try
@@ -90,6 +91,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("SearchBlogsByTitle/{title}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<Blog>>> SearchBlogsByTitle(string title)
     {
         try
@@ -127,6 +129,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("GetBlogById/{id}")]
+    [Authorize]
     public async Task<ActionResult<Blog>> GetBlogById(Guid id)
     {
         try
@@ -147,17 +150,7 @@ public class BlogController : ControllerBase
     [HttpGet("[action]/{id}")]
     public async Task<IActionResult> Image(Guid id)
     {
-        try
-        {
-            base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
-
-            var tokenNew = headerValues.FirstOrDefault().Substring(7);
-            this.tokenValidation.ValidateToken(tokenNew);
-        }
-        catch (Exception ex)
-        {
-            return Unauthorized(ex.Message);
-        }
+        
         var blog = await blogService.GetBlogById(id);
         if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
         {

@@ -68,12 +68,12 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
+app.UseCors("BlazorApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
-app.UseCors("BlazorApp");
 
 app.Run();
 
