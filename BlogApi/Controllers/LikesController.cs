@@ -19,23 +19,39 @@ namespace BlogApi.Controllers
         [HttpPost("LikeBlog")]
         public async Task<IActionResult> LikeBlog([FromBody] LikeRequest likeRequest)
         {
-            var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.BlogId == likeRequest.BlogId && l.UserId == likeRequest.UserId);
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.BlogId == likeRequest.BlogId && l.UserId == likeRequest.UserId);
+
+            if (existingLike != null)
+            {
+                return BadRequest("Blog already liked by this user.");
+            }
+
+            var like = new Like
+            {
+                BlogId = likeRequest.BlogId,
+                UserId = likeRequest.UserId,
+                LikedAt = DateTime.UtcNow
+            };
+            _context.Likes.Add(like);
+            await _context.SaveChangesAsync();
+
+            var likeCount = await _context.Likes.CountAsync(l => l.BlogId == likeRequest.BlogId);
+            return Ok(likeCount);
+        }
+
+        [HttpPost("UnlikeBlog")]
+        public async Task<IActionResult> UnlikeBlog([FromBody] LikeRequest likeRequest)
+        {
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.BlogId == likeRequest.BlogId && l.UserId == likeRequest.UserId);
 
             if (existingLike == null)
             {
-                var like = new Like
-                {
-                    BlogId = likeRequest.BlogId,
-                    UserId = likeRequest.UserId,
-                    LikedAt = DateTime.UtcNow
-                };
-                _context.Likes.Add(like);
-            }
-            else
-            {
-                _context.Likes.Remove(existingLike);
+                return BadRequest("Blog not liked by this user.");
             }
 
+            _context.Likes.Remove(existingLike);
             await _context.SaveChangesAsync();
 
             var likeCount = await _context.Likes.CountAsync(l => l.BlogId == likeRequest.BlogId);
