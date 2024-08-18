@@ -21,15 +21,22 @@ public class BlogEfRepository : IBlogRepository
     {
         obj.Id = Guid.NewGuid();
         var extension = new FileInfo(image.FileName).Extension[1..];
-        obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
+
+        var directory = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "BlogsImg");
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        obj.PictureUrl = Path.Combine(directory, $"{obj.Id}.{extension}");
 
         using var newFileStream = System.IO.File.Create(obj.PictureUrl);
         await image.CopyToAsync(newFileStream);
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
-
     }
+
 
 
     public async Task<Blog?> GetBlogById(Guid id)
