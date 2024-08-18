@@ -48,6 +48,7 @@ public class BlogEfRepository : IBlogRepository
                 Title = blog.Title,
                 Text = blog.Text,
                 UserName = blog.User.UserName,
+                UserId = blog.UserId,
                 PictureUrl = blog.PictureUrl,
                 CreationDate = blog.CreationDate
             })
