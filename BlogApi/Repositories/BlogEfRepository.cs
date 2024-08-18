@@ -21,15 +21,7 @@ public class BlogEfRepository : IBlogRepository
     {
         obj.Id = Guid.NewGuid();
         var extension = new FileInfo(image.FileName).Extension[1..];
-
-        var directory = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "BlogsImg");
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        obj.PictureUrl = Path.Combine(directory, $"{obj.Id}.{extension}");
-
+        obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
         using var newFileStream = System.IO.File.Create(obj.PictureUrl);
         await image.CopyToAsync(newFileStream);
 

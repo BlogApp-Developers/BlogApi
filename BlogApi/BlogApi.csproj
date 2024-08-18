@@ -24,4 +24,11 @@
    
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Assets\BlogsImg\**\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
