@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
             options.AddPolicy("BlazorApp", policyBuilder =>
             {
                 policyBuilder
-                    .WithOrigins("http://localhost:5234")
+                    .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });

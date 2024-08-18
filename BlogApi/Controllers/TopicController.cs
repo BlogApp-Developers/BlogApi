@@ -10,7 +10,7 @@ using Microsoft.Extensions.Primitives;
 namespace BlogApi.Controllers;
 
 [ApiController]
-//[Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class TopicController : ControllerBase
 {

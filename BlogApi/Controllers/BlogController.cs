@@ -7,7 +7,6 @@ using Microsoft.Extensions.Primitives;
 namespace BlogApi.Controllers;
 
 [ApiController]
-
 [Route("api/[controller]")]
 public class BlogController : ControllerBase
 {
@@ -19,7 +18,6 @@ public class BlogController : ControllerBase
         this.tokenValidation = tokenValidation;
     }
 
-    [Authorize]
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateBlog([FromForm] string title, [FromForm] string text, [FromForm] int topicId, [FromForm] Guid userId, IFormFile image)
     {
@@ -57,7 +55,6 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("GetBlogsByTopic/{topicId}")]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<Blog>>> GetBlogsByTopic(int topicId)
     {
         try
@@ -91,7 +88,6 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("SearchBlogsByTitle/{title}")]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<Blog>>> SearchBlogsByTitle(string title)
     {
         try
@@ -129,7 +125,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("GetBlogById/{id}")]
-    [Authorize]
+  
     public async Task<ActionResult<Blog>> GetBlogById(Guid id)
     {
         try
