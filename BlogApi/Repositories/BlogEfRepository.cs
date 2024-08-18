@@ -62,4 +62,24 @@ public class BlogEfRepository : IBlogRepository
         .Where(b => b.Title.ToLower().Contains(title.ToLower()))
         .ToListAsync();
     }
+
+
+    public async Task<IEnumerable<BlogDto>?> GetBlogByUserId(Guid userId)
+    {
+        var blogs = await _dbContext.Blogs
+            .Where(blog => blog.UserId == userId)
+            .Include(blog => blog.User)
+            .Select(blog => new BlogDto
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Text = blog.Text,
+                UserName = blog.User.UserName,
+                PictureUrl = blog.PictureUrl,
+                CreationDate = blog.CreationDate
+            })
+            .ToListAsync();
+
+        return blogs;
+    }
 }

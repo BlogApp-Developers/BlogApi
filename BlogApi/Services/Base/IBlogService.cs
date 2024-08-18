@@ -8,4 +8,5 @@ public interface IBlogService
     public Task<Blog> GetBlogById(Guid id);
 
     public Task<IEnumerable<Blog>> SearchBlogsByTitleAsync(string title);
+    public Task<IEnumerable<BlogDto>> GetBlogByUserId(Guid userId);
 }

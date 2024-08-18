@@ -125,7 +125,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet("GetBlogById/{id}")]
-  
+
     public async Task<ActionResult<Blog>> GetBlogById(Guid id)
     {
         try
@@ -139,14 +139,45 @@ public class BlogController : ControllerBase
         {
             return Unauthorized(ex.Message);
         }
+
         return await blogService.GetBlogById(id);
     }
+
+
+
+    [HttpGet("[action]/{userId}")]
+    public async Task<ActionResult<IEnumerable<Blog>>> GetBlogByUserId(Guid userId)
+    {
+        try
+        {
+            base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
+            var tokenNew = headerValues.FirstOrDefault().Substring(7);
+            this.tokenValidation.ValidateToken(tokenNew);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+
+        var blogs = await blogService.GetBlogByUserId(userId);
+
+        if (blogs == null || !blogs.Any())
+        {
+            return NotFound("No blogs found for this user.");
+        }
+
+        return Ok(blogs);
+    }
+
+
+
+
 
 
     [HttpGet("[action]/{id}")]
     public async Task<IActionResult> Image(Guid id)
     {
-        
+
         var blog = await blogService.GetBlogById(id);
         if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
         {
