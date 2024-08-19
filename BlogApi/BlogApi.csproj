@@ -25,10 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\BlogsImg\**\*">
+    <Content Include="Assets/BlogsImg\**\*.*">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
+    </Content>
   </ItemGroup>
+
 
 </Project>
