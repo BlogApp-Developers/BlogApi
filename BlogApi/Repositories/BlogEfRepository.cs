@@ -8,52 +8,52 @@ namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
-    private readonly BlobServiceClient _blobServiceClient;
+    //private readonly BlobServiceClient _blobServiceClient;
 
 
-    public BlogEfRepository(BlogDbContext dbContext, BlobServiceClient blobServiceClient)
+    public BlogEfRepository(BlogDbContext dbContext)
     {
         _dbContext = dbContext;
-        _blobServiceClient = blobServiceClient;
+        //_blobServiceClient = blobServiceClient;
     }
 
 
-    // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
-    // {
-    //     obj.Id = Guid.NewGuid();
-    //     var extension = new FileInfo(image.FileName).Extension[1..];
-    //     obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
-    //     using var newFileStream = System.IO.File.Create(obj.PictureUrl);
-    //     await image.CopyToAsync(newFileStream);
-
-    //     await _dbContext.Blogs.AddAsync(obj);
-    //     await _dbContext.SaveChangesAsync();
-    // }
-
     public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     {
-
         obj.Id = Guid.NewGuid();
-
-        var extension = Path.GetExtension(image.FileName);
-
-        var blobName = $"{obj.Id}{extension}";
-
-        string containerName = "blogsimage"; 
-        var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-        var blobClient = containerClient.GetBlobClient(blobName);
-
-        using (var stream = image.OpenReadStream())
-        {
-            await blobClient.UploadAsync(stream, true);
-        }
-
-        obj.PictureUrl = blobClient.Uri.ToString();
+        var extension = new FileInfo(image.FileName).Extension[1..];
+        obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
+        using var newFileStream = System.IO.File.Create(obj.PictureUrl);
+        await image.CopyToAsync(newFileStream);
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
     }
+
+    // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
+    // {
+
+    //     obj.Id = Guid.NewGuid();
+
+    //     var extension = Path.GetExtension(image.FileName);
+
+    //     var blobName = $"{obj.Id}{extension}";
+
+    //     string containerName = "blogsimage"; 
+    //     var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+    //     var blobClient = containerClient.GetBlobClient(blobName);
+
+    //     using (var stream = image.OpenReadStream())
+    //     {
+    //         await blobClient.UploadAsync(stream, true);
+    //     }
+
+    //     obj.PictureUrl = blobClient.Uri.ToString();
+
+    //     await _dbContext.Blogs.AddAsync(obj);
+    //     await _dbContext.SaveChangesAsync();
+    // }
 
 
 
