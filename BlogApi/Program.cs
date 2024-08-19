@@ -25,6 +25,15 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
 });
 
 
+string azureBlobStorageConnectionString = builder.Configuration.GetConnectionString("AzureBlobStorage");
+
+// Use the connection string as needed, for example to create a BlobServiceClient
+var blobServiceClient = new BlobServiceClient(azureBlobStorageConnectionString);
+
+// Add services to the container.
+builder.Services.AddSingleton(blobServiceClient);
+
+
 
 builder.Services.AddTransient<IBlogService, BlogService>();
 builder.Services.AddTransient<IBlogRepository, BlogEfRepository>();
