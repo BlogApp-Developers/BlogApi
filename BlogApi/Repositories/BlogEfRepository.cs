@@ -10,39 +10,39 @@ namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
-    private readonly string connectionString;
+    //private readonly string connectionString;
     //private readonly BlobServiceClient _blobServiceClient;
 
 
-    public BlogEfRepository(BlogDbContext dbContext, IOptionsSnapshot<BlobOptions> options)
+    public BlogEfRepository(BlogDbContext dbContext)
     {
         _dbContext = dbContext;
-        this.connectionString = options.Value.ConnectionString;
+        //this.connectionString = options.Value.ConnectionString;
         //_blobServiceClient = blobServiceClient;
     }
 
 
-    public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
-    {
+    // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
+    // {
         
-        obj.Id = Guid.NewGuid();
+    //     obj.Id = Guid.NewGuid();
 
-        var extension = new FileInfo(image.FileName).Extension[1..];
+    //     var extension = new FileInfo(image.FileName).Extension[1..];
 
-        var blobServiceClient = new BlobServiceClient(this.connectionString);
-        var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
+    //     var blobServiceClient = new BlobServiceClient(this.connectionString);
+    //     var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
 
-        string blobName = $"{obj.Id}.{extension}";
-        var blobClient = containerClient.GetBlobClient(blobName);
+    //     string blobName = $"{obj.Id}.{extension}";
+    //     var blobClient = containerClient.GetBlobClient(blobName);
 
-        using var stream = image.OpenReadStream();
-        await blobClient.UploadAsync(stream, overwrite: true);
+    //     using var stream = image.OpenReadStream();
+    //     await blobClient.UploadAsync(stream, overwrite: true);
 
-        obj.PictureUrl = blobClient.Uri.ToString();
+    //     obj.PictureUrl = blobClient.Uri.ToString();
 
-        await _dbContext.Blogs.AddAsync(obj);
-        await _dbContext.SaveChangesAsync();
-    }
+    //     await _dbContext.Blogs.AddAsync(obj);
+    //     await _dbContext.SaveChangesAsync();
+    // }
 
     // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     // {
@@ -56,30 +56,31 @@ public class BlogEfRepository : IBlogRepository
     //     await _dbContext.SaveChangesAsync();
     // }
 
-    // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
-    // {
+    public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
+    {
 
-    //     obj.Id = Guid.NewGuid();
+        obj.Id = Guid.NewGuid();
 
-    //     var extension = Path.GetExtension(image.FileName);
+        var extension = Path.GetExtension(image.FileName);
 
-    //     var blobName = $"{obj.Id}{extension}";
+        var blobName = $"{obj.Id}{extension}";
+        var connectionString = "";
+        var blobServiceClient = new BlobServiceClient(connectionString);
+        string containerName = "blogsimage"; 
+        var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
-    //     string containerName = "blogsimage"; 
-    //     var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        var blobClient = containerClient.GetBlobClient(blobName);
 
-    //     var blobClient = containerClient.GetBlobClient(blobName);
+        using (var stream = image.OpenReadStream())
+        {
+            await blobClient.UploadAsync(stream, true);
+        }
 
-    //     using (var stream = image.OpenReadStream())
-    //     {
-    //         await blobClient.UploadAsync(stream, true);
-    //     }
+        obj.PictureUrl = blobClient.Uri.ToString();
 
-    //     obj.PictureUrl = blobClient.Uri.ToString();
-
-    //     await _dbContext.Blogs.AddAsync(obj);
-    //     await _dbContext.SaveChangesAsync();
-    // }
+        await _dbContext.Blogs.AddAsync(obj);
+        await _dbContext.SaveChangesAsync();
+    }
 
 
 

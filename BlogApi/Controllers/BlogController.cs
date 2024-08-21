@@ -15,13 +15,13 @@ public class BlogController : ControllerBase
 {
     private readonly IBlogService blogService;
     //private readonly BlobServiceClient _blobServiceClient;
-    private readonly string connectionString;
+    //private readonly string connectionString;
     private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
-    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation, IOptionsSnapshot<BlobOptions> options)
+    public BlogController(IBlogService blogService,  BlogApi.TokenValidation.TokenValidation tokenValidation)
     {
         this.blogService = blogService;
         this.tokenValidation = tokenValidation;
-        this.connectionString = options.Value.ConnectionString;
+        //this.connectionString = options.Value.ConnectionString;
         //_blobServiceClient = blobServiceClient;
     }
 
@@ -195,28 +195,30 @@ public class BlogController : ControllerBase
     // }
 
 
-    // [HttpGet("[action]/{id}")]
-    // public async Task<IActionResult> Image(Guid id)
-    // {
+    [HttpGet("[action]/{id}")]
+    public async Task<IActionResult> Image(Guid id)
+    {
 
-    //     string containerName = "blogsimage"; 
+        var connectionString = "";
+        var blobServiceClient = new BlobServiceClient(connectionString);
+        string containerName = "blogsimage"; 
 
-    //     string blobName = $"{id}.jpg"; 
+        string blobName = $"{id}.jpg"; 
 
-    //     var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
-    //     var blobClient = containerClient.GetBlobClient(blobName);
+        var blobClient = containerClient.GetBlobClient(blobName);
 
-    //     if (await blobClient.ExistsAsync())
-    //     {
-    //         var downloadInfo = await blobClient.DownloadAsync();
-    //         return File(downloadInfo.Value.Content, downloadInfo.Value.ContentType);
-    //     }
-    //     else
-    //     {
-    //         return NotFound("Image not found");
-    //     }
-    // }
+        if (await blobClient.ExistsAsync())
+        {
+            var downloadInfo = await blobClient.DownloadAsync();
+            return File(downloadInfo.Value.Content, downloadInfo.Value.ContentType);
+        }
+        else
+        {
+            return NotFound("Image not found");
+        }
+    }
 
     // [HttpGet("[action]/{id}")]
     // public async Task<IActionResult> Image(Guid id)
@@ -255,20 +257,20 @@ public class BlogController : ControllerBase
 
 
 
-    [HttpGet("[action]/{id}")]
-    public async Task<IActionResult> Image(Guid id)
-    {
+    // [HttpGet("[action]/{id}")]
+    // public async Task<IActionResult> Image(Guid id)
+    // {
 
-        var blobServiceClient = new BlobServiceClient(this.connectionString);
+    //     var blobServiceClient = new BlobServiceClient(this.connectionString);
 
-        var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
-        var blobClient = containerClient.GetBlobClient(id.ToString());
+    //     var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
+    //     var blobClient = containerClient.GetBlobClient(id.ToString());
 
-        var stream = new MemoryStream();
-        await blobClient.DownloadToAsync(stream);
-        stream.Position = 0;
+    //     var stream = new MemoryStream();
+    //     await blobClient.DownloadToAsync(stream);
+    //     stream.Position = 0;
 
-        return File(stream, "image/jpeg"); 
-    }
+    //     return File(stream, "image/jpeg"); 
+    // }
 
 }
