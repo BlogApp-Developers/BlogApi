@@ -4,6 +4,7 @@ using BlogApi.Options;
 using BlogApi.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
 namespace BlogApi.Controllers;
@@ -14,13 +15,13 @@ public class BlogController : ControllerBase
 {
     private readonly IBlogService blogService;
     //private readonly BlobServiceClient _blobServiceClient;
-    private readonly BlobOptions blobOptions;
+    private readonly string connectionString;
     private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
-    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation, BlobOptions blobOptions)
+    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation, IOptionsSnapshot<BlobOptions> options)
     {
         this.blogService = blogService;
         this.tokenValidation = tokenValidation;
-        this.blobOptions = blobOptions;
+        this.connectionString = options.Value.ConnectionString;
         //_blobServiceClient = blobServiceClient;
     }
 
@@ -258,7 +259,7 @@ public class BlogController : ControllerBase
     public async Task<IActionResult> Image(Guid id)
     {
 
-        var blobServiceClient = new BlobServiceClient(blobOptions.ConnectionString);
+        var blobServiceClient = new BlobServiceClient(this.connectionString);
 
         var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
         var blobClient = containerClient.GetBlobClient(id.ToString());

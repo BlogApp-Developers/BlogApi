@@ -4,19 +4,20 @@ using BlogApi.Models;
 using BlogApi.Options;
 using BlogApi.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
-    private readonly BlobOptions blobOptions;
+    private readonly string connectionString;
     //private readonly BlobServiceClient _blobServiceClient;
 
 
-    public BlogEfRepository(BlogDbContext dbContext, BlobOptions blobOptions)
+    public BlogEfRepository(BlogDbContext dbContext, IOptionsSnapshot<BlobOptions> options)
     {
         _dbContext = dbContext;
-        this.blobOptions = blobOptions;
+        this.connectionString = options.Value.ConnectionString;
         //_blobServiceClient = blobServiceClient;
     }
 
@@ -28,7 +29,7 @@ public class BlogEfRepository : IBlogRepository
 
         var extension = new FileInfo(image.FileName).Extension[1..];
 
-        var blobServiceClient = new BlobServiceClient(blobOptions.ConnectionString);
+        var blobServiceClient = new BlobServiceClient(this.connectionString);
         var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
 
         string blobName = $"{obj.Id}.{extension}";
