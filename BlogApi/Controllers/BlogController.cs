@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using BlogApi.Models;
+using BlogApi.Options;
 using BlogApi.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ public class BlogController : ControllerBase
 {
     private readonly IBlogService blogService;
     //private readonly BlobServiceClient _blobServiceClient;
+    private readonly BlobOptions blobOptions;
     private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
-    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation)
+    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation, BlobOptions blobOptions)
     {
         this.blogService = blogService;
         this.tokenValidation = tokenValidation;
+        this.blobOptions = blobOptions;
         //_blobServiceClient = blobServiceClient;
     }
 
@@ -177,18 +180,18 @@ public class BlogController : ControllerBase
 
 
 
-    [HttpGet("[action]/{id}")]
-    public async Task<IActionResult> Image(Guid id)
-    {
+    // [HttpGet("[action]/{id}")]
+    // public async Task<IActionResult> Image(Guid id)
+    // {
 
-        var blog = await blogService.GetBlogById(id);
-        if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
-        {
-            return NotFound("Blogs or image not found.");
-        }
-        var fileStream = System.IO.File.Open(blog.PictureUrl!, FileMode.Open);
-        return File(fileStream, "image/jpeg");
-    }
+    //     var blog = await blogService.GetBlogById(id);
+    //     if (blog == null || string.IsNullOrEmpty(blog.PictureUrl))
+    //     {
+    //         return NotFound("Blogs or image not found.");
+    //     }
+    //     var fileStream = System.IO.File.Open(blog.PictureUrl!, FileMode.Open);
+    //     return File(fileStream, "image/jpeg");
+    // }
 
 
     // [HttpGet("[action]/{id}")]
@@ -247,5 +250,24 @@ public class BlogController : ControllerBase
     //     return File(downloadInfo.Value.Content, downloadInfo.Value.ContentType);
     // }
 
+
+
+
+
+    [HttpGet("[action]/{id}")]
+    public async Task<IActionResult> Image(Guid id)
+    {
+
+        var blobServiceClient = new BlobServiceClient(blobOptions.ConnectionString);
+
+        var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
+        var blobClient = containerClient.GetBlobClient(id.ToString());
+
+        var stream = new MemoryStream();
+        await blobClient.DownloadToAsync(stream);
+        stream.Position = 0;
+
+        return File(stream, "image/jpeg"); 
+    }
 
 }

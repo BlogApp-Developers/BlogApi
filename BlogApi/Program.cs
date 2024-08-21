@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Azure.Storage.Blobs;
 using BlogApi.Data;
 using BlogApi.Extensions;
+using BlogApi.Options;
 using BlogApi.Repositories;
 using BlogApi.Repositories.Base;
 using BlogApi.Services;
@@ -32,6 +33,10 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
 
 // // Add services to the container.
 // builder.Services.AddSingleton(blobServiceClient);
+
+
+builder.Services.Configure<BlobOptions>(
+    builder.Configuration.GetSection("Connections").GetSection("StringConnection"));
 
 
 

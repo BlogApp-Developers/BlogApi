@@ -1,6 +1,7 @@
 using Azure.Storage.Blobs;
 using BlogApi.Data;
 using BlogApi.Models;
+using BlogApi.Options;
 using BlogApi.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,27 +9,51 @@ namespace BlogApi.Repositories;
 public class BlogEfRepository : IBlogRepository
 {
     private readonly BlogDbContext _dbContext;
+    private readonly BlobOptions blobOptions;
     //private readonly BlobServiceClient _blobServiceClient;
 
 
-    public BlogEfRepository(BlogDbContext dbContext)
+    public BlogEfRepository(BlogDbContext dbContext, BlobOptions blobOptions)
     {
         _dbContext = dbContext;
+        this.blobOptions = blobOptions;
         //_blobServiceClient = blobServiceClient;
     }
 
 
     public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     {
+        
         obj.Id = Guid.NewGuid();
+
         var extension = new FileInfo(image.FileName).Extension[1..];
-        obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
-        using var newFileStream = System.IO.File.Create(obj.PictureUrl);
-        await image.CopyToAsync(newFileStream);
+
+        var blobServiceClient = new BlobServiceClient(blobOptions.ConnectionString);
+        var containerClient = blobServiceClient.GetBlobContainerClient("blogsimage");
+
+        string blobName = $"{obj.Id}.{extension}";
+        var blobClient = containerClient.GetBlobClient(blobName);
+
+        using var stream = image.OpenReadStream();
+        await blobClient.UploadAsync(stream, overwrite: true);
+
+        obj.PictureUrl = blobClient.Uri.ToString();
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
     }
+
+    // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
+    // {
+    //     obj.Id = Guid.NewGuid();
+    //     var extension = new FileInfo(image.FileName).Extension[1..];
+    //     obj.PictureUrl = $"Assets/BlogsImg/{obj.Id}.{extension}";
+    //     using var newFileStream = System.IO.File.Create(obj.PictureUrl);
+    //     await image.CopyToAsync(newFileStream);
+
+    //     await _dbContext.Blogs.AddAsync(obj);
+    //     await _dbContext.SaveChangesAsync();
+    // }
 
     // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     // {
