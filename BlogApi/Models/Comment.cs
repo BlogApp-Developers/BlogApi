@@ -16,10 +16,10 @@ namespace BlogApi.Models
 
         [ForeignKey("Blog")]
         public Guid BlogId { get; set; }
-        public Blog Blog { get; set; }
+        //public Blog Blog { get; set; }
 
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public User User { get; set; }
+        //public User User { get; set; }
     }
 }

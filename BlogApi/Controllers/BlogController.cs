@@ -17,7 +17,7 @@ public class BlogController : ControllerBase
     //private readonly BlobServiceClient _blobServiceClient;
     //private readonly string connectionString;
     private readonly BlogApi.TokenValidation.TokenValidation tokenValidation;
-    public BlogController(IBlogService blogService,  BlogApi.TokenValidation.TokenValidation tokenValidation)
+    public BlogController(IBlogService blogService, BlogApi.TokenValidation.TokenValidation tokenValidation)
     {
         this.blogService = blogService;
         this.tokenValidation = tokenValidation;
@@ -66,18 +66,18 @@ public class BlogController : ControllerBase
     {
         try
         {
-
             try
             {
                 base.HttpContext.Request.Headers.TryGetValue("Authorization", out StringValues headerValues);
 
-                var tokenNew = headerValues.FirstOrDefault().Substring(7);
+                var tokenNew = headerValues.FirstOrDefault()?.Substring(7);
                 this.tokenValidation.ValidateToken(tokenNew);
             }
             catch (Exception ex)
             {
                 return Unauthorized(ex.Message);
             }
+
             var blogs = await blogService.GetBlogsByTopicAsync(topicId);
 
             if (blogs == null || !blogs.Any())
@@ -85,13 +85,16 @@ public class BlogController : ControllerBase
                 return NotFound("Blogs not found");
             }
 
-            return Ok(blogs);
+            var reversedBlogs = blogs.Reverse();
+
+            return Ok(reversedBlogs);
         }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);
         }
     }
+
 
 
     [HttpGet("SearchBlogsByTitle/{title}")]
@@ -225,7 +228,7 @@ public class BlogController : ControllerBase
     {
         var connectionString = "";
         var blobServiceClient = new BlobServiceClient(connectionString);
-        string containerName = "blogsimage"; 
+        string containerName = "blogsimage";
 
         string[] possibleExtensions = { ".jpg", ".png", ".jpeg", ".gif" };
         string foundBlobName = null;

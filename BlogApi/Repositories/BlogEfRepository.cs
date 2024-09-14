@@ -24,7 +24,7 @@ public class BlogEfRepository : IBlogRepository
 
     // public async Task CreateNewBlogAsync(Blog obj, IFormFile image)
     // {
-        
+
     //     obj.Id = Guid.NewGuid();
 
     //     var extension = new FileInfo(image.FileName).Extension[1..];
@@ -66,7 +66,7 @@ public class BlogEfRepository : IBlogRepository
         var blobName = $"{obj.Id}{extension}";
         var connectionString = "";
         var blobServiceClient = new BlobServiceClient(connectionString);
-        string containerName = "blogsimage"; 
+        string containerName = "blogsimage";
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
         var blobClient = containerClient.GetBlobClient(blobName);
@@ -95,6 +95,7 @@ public class BlogEfRepository : IBlogRepository
         var blogs = await _dbContext.Blogs
             .Where(blog => blog.TopicId == topicId)
             .Include(blog => blog.User)
+            .OrderByDescending(blog => blog.CreationDate) 
             .Select(blog => new BlogDto
             {
                 Id = blog.Id,
@@ -109,6 +110,7 @@ public class BlogEfRepository : IBlogRepository
 
         return blogs;
     }
+
 
     public async Task<IEnumerable<Blog>> SearchBlogsByTitle(string title)
     {

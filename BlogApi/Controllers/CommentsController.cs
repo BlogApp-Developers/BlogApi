@@ -1,6 +1,7 @@
 using BlogApi.Data;
 using BlogApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Controllers
 {
@@ -28,20 +29,22 @@ namespace BlogApi.Controllers
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCommentById), new { id = comment.Id }, comment);
+            return CreatedAtAction(nameof(GetCommentsByBlogId), new { id = comment.Id }, comment);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCommentById(int id)
+        [HttpGet("{blogId}")]
+        public async Task<IActionResult> GetCommentsByBlogId(Guid blogId)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comments = await _context.Comments
+                .Where(c => c.BlogId == blogId)
+                .ToListAsync();
 
-            if (comment == null)
+            if (comments == null || !comments.Any())
             {
                 return NotFound();
             }
 
-            return Ok(comment);
+            return Ok(comments);
         }
 
         [HttpDelete("{id}")]
