@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Azure.Storage.Blobs;
 using BlogApi.Data;
 using BlogApi.Extensions;
+using BlogApi.HostedServices;
 using BlogApi.Options;
 using BlogApi.Repositories;
 using BlogApi.Repositories.Base;
@@ -18,6 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.InitCors();
 builder.Services.InitAspnetIdentity(builder.Configuration);
 builder.Services.InitAuth(builder.Configuration);
+var rabbitMqSection = builder.Configuration.GetSection("RabbitMq");
+builder.Services.Configure<RabbitMqOptions>(rabbitMqSection);
+
+builder.Services.AddHostedService<UserHostedService>();
 
 builder.Services.AddDbContext<BlogDbContext>(options =>
 {
