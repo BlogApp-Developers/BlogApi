@@ -251,7 +251,7 @@ public class BlogController : ControllerBase
         {
             return NotFound("Image not found");
         }
-
+        Console.WriteLine("ok");
         var finalBlobClient = containerClient.GetBlobClient(foundBlobName);
         var downloadInfo = await finalBlobClient.DownloadAsync();
         return File(downloadInfo.Value.Content, downloadInfo.Value.ContentType);

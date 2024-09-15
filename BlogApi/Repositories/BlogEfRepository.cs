@@ -80,6 +80,7 @@ public class BlogEfRepository : IBlogRepository
 
         await _dbContext.Blogs.AddAsync(obj);
         await _dbContext.SaveChangesAsync();
+        
     }
 
 
