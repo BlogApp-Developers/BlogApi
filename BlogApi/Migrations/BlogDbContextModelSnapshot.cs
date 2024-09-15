@@ -69,6 +69,9 @@ namespace BlogApi.Migrations
                     b.Property<Guid>("BlogId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("BlogId1")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("text");
@@ -79,11 +82,18 @@ namespace BlogApi.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BlogId");
 
+                    b.HasIndex("BlogId1");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Comments");
                 });
@@ -371,21 +381,25 @@ namespace BlogApi.Migrations
 
             modelBuilder.Entity("BlogApi.Models.Comment", b =>
                 {
-                    b.HasOne("BlogApi.Models.Blog", "Blog")
-                        .WithMany("Comments")
+                    b.HasOne("BlogApi.Models.Blog", null)
+                        .WithMany()
                         .HasForeignKey("BlogId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogApi.Models.User", "User")
+                    b.HasOne("BlogApi.Models.Blog", null)
                         .WithMany("Comments")
+                        .HasForeignKey("BlogId1");
+
+                    b.HasOne("BlogApi.Models.User", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Blog");
-
-                    b.Navigation("User");
+                    b.HasOne("BlogApi.Models.User", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId1");
                 });
 
             modelBuilder.Entity("BlogApi.Models.Like", b =>

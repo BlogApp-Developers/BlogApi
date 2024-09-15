@@ -45,13 +45,13 @@ public class BlogDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
             .HasForeignKey(b => b.TopicId);
 
         modelBuilder.Entity<Comment>()
-            .HasOne(c => c.Blog)
-            .WithMany(b => b.Comments)
-            .HasForeignKey(c => c.BlogId);
+                    .HasOne<Blog>()  
+                    .WithMany()     
+                    .HasForeignKey(c => c.BlogId);
 
         modelBuilder.Entity<Comment>()
-            .HasOne(c => c.User)
-            .WithMany(u => u.Comments)
+            .HasOne<User>()  
+            .WithMany()     
             .HasForeignKey(c => c.UserId);
 
         modelBuilder.Entity<Like>()
