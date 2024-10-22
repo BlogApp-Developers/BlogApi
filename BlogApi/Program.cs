@@ -13,11 +13,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using BlogApi.HostedServices;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.InitCors();
 builder.Services.InitAspnetIdentity(builder.Configuration);
 builder.Services.InitAuth(builder.Configuration);
+var rabbitMqSection = builder.Configuration.GetSection("RabbitMq");
+builder.Services.Configure<RabbitMqOptions>(rabbitMqSection);
+
+builder.Services.AddHostedService<UserHostedService>();
 
 
 builder.Services.AddDbContext<BlogDbContext>(options =>
