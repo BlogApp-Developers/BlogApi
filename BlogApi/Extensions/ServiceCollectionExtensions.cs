@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
 
     public static void InitAspnetIdentity(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
-        serviceCollection.AddDbContext<BlogDbContext>(options =>
+        serviceCollection.AddDbContextFactory<BlogDbContext>(options =>
         {
             var connectionString = configuration.GetConnectionString("PostgreSqlDev");
             options.UseNpgsql(connectionString);

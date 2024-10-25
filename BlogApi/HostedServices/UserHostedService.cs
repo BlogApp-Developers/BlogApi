@@ -4,6 +4,7 @@ using BlogApi.Data;
 using BlogApi.Enums;
 using BlogApi.Models;
 using BlogApi.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,9 +15,8 @@ public class UserHostedService : IHostedService
     private readonly IConnection connection;
     private readonly IModel model;
     private const string QUEUE_NAME = "user";
-    private readonly string connectionString;
-    private readonly BlogDbContext dbContext;
-    public UserHostedService(IOptions<RabbitMqOptions> optionsSnapshot, IConfiguration configuration)
+    private readonly IDbContextFactory<BlogDbContext> dbContextFactory;
+    public UserHostedService(IDbContextFactory<BlogDbContext> dbContextFactory, IOptions<RabbitMqOptions> optionsSnapshot, IConfiguration configuration)
     {
         this.rabbitMqConnectionFactory = new ConnectionFactory()
         {
@@ -24,9 +24,9 @@ public class UserHostedService : IHostedService
             UserName = optionsSnapshot.Value.UserName,
             Password = optionsSnapshot.Value.Password
         };
+        this.dbContextFactory = dbContextFactory;
         this.connection = this.rabbitMqConnectionFactory.CreateConnection();
         this.model = connection.CreateModel();
-        this.connectionString = configuration.GetConnectionString("PostgreSqlDev");
     }
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -41,29 +41,31 @@ public class UserHostedService : IHostedService
         {
             string? newUserJson = null;
             try {
-                newUserJson = Encoding.ASCII.GetString(deliverEventArgs.Body.ToArray());
+                var biteArray = deliverEventArgs.Body.ToArray();
+                newUserJson = Encoding.Unicode.GetString(biteArray);
                 var newUserJsonData = newUserJson.Split('&');
                 var rabbitMqAction = JsonSerializer.Deserialize<RabbitMQAction>(newUserJsonData[0])!;
                 var newUser = JsonSerializer.Deserialize<User>(newUserJsonData[1])!;
+                using var dbContext = this.dbContextFactory.CreateDbContext();
                 
                 switch (rabbitMqAction)
                 {
                     case RabbitMQAction.Create:
                     {
-                        this.dbContext.Users.Add(newUser);
-                        this.dbContext.SaveChanges();
+                        dbContext.Users.Add(newUser);
+                        dbContext.SaveChanges();
                         break;
                     }
                     case RabbitMQAction.Update:
                     {
-                        this.dbContext.Users.Update(newUser);
-                        this.dbContext.SaveChanges();
+                        dbContext.Users.Update(newUser);
+                        dbContext.SaveChanges();
                         break;
                     }
                     case RabbitMQAction.Delete:
                     {
-                        this.dbContext.Users.Remove(newUser);
-                        this.dbContext.SaveChanges();
+                        dbContext.Users.Remove(newUser);
+                        dbContext.SaveChanges();
                         break;
                     }
                     default:
